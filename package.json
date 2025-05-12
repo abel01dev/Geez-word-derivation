@@ -1,0 +1,12 @@
+{
+  "name": "geez-word-derivation",
+  "version": "1.0.0",
+  "main": "derivation_engine.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
