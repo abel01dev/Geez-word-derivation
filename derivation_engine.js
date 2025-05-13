@@ -40,7 +40,9 @@ const vowelMap = {
 "ፐ" : ["ፐ", "ፑ", "ፒ", "ፓ", "ፔ", "ፕ", "ፖ"] , 
 };
 
-// Invert the vowel map to identify the root and vowel index
+// Traverse the vowel map to identify the root and vowel index
+// Inputs- A character
+// Outputs- an Object with Base-Index pair
 function getVowelInfo(char) {
   for (const [base, forms] of Object.entries(vowelMap)) {
     const idx = forms.indexOf(char);
@@ -50,14 +52,16 @@ function getVowelInfo(char) {
 }
 
 // Decode Amharic word into base chars and vowels
+// Inputs- A word
+// Outputs- Objects with Base-Index pairs
 function decomposeWord(word) {
   return word.split("").map(char => getVowelInfo(char));
 }
 
 // Apply rule to word
 function applyRule(word, rule) {
-  const letters = word.split("");
-  const decomposed = decomposeWord(word);
+  const letters = word.split(""); //An Array of the characters
+  const decomposed = decomposeWord(word); //Objects with pair values
 
   // Match condition
   if (
@@ -92,6 +96,15 @@ function applyRule(word, rule) {
       });
     }
 
+    // Delete character(s) if any
+    const deleteIndexes = rule[form].delete || [];
+    deleteIndexes.sort((a, b) => b - a);
+    deleteIndexes.forEach(index => {
+      if (index >= 0 && index < newLetters.length) {
+        newLetters.splice(index, 1);
+      }
+    });
+
     derived[form] = `${prefix || ""}${newLetters.join("")}${suffix || ""}`;
   }
 
@@ -102,7 +115,7 @@ function applyRule(word, rule) {
 // Load all rule JSONs
 function loadAllRules() {
   const ruleDir = __dirname;
-  const ruleFiles = ["rules/rules_r1.json", "rules/rules_r2.json", "rules/rules_r3.json", "rules/rules_r4.json"];
+  const ruleFiles = ["rules/rules_r1.json", "rules/rules_r2.json", "rules/rules_r3.json", "rules/rules_r4.json","rules/rules_r5.json", "rules/rules_r6.json", "rules/rules_r7.json", "rules/rules_r8.json"];
   return ruleFiles.map(file => JSON.parse(fs.readFileSync(path.join(ruleDir, file), "utf-8")));
 }
 
@@ -125,4 +138,8 @@ deriveWord("ቀተለ"); // rule 1
 deriveWord("ቀደሰ"); // rule 2
 deriveWord("ተንበለ"); // rule 3
 deriveWord("ባረከ"); // rule 4
+deriveWord("ማህረከ"); // rule 5
+deriveWord("ሴሰየ"); // rule 6
+deriveWord("ክህለ"); // rule 7
+deriveWord("ጦመረ"); // rule 8
 deriveWord("ሄደ");  // no match

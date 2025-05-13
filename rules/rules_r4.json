@@ -1,5 +1,5 @@
 {
-  "conditions": { "length": 4, "firstVowelIndex": 0 },
+  "conditions": { "length": 3, "firstVowelIndex": 3 },
   "pastTense": {
     "prefix": "",
     "vowelChange": null,
@@ -8,7 +8,6 @@
   "futureTense": {
     "prefix": "ይ",
     "vowelChange": [
-     { "index": 0, "toVowel": 0 },
      { "index": 1, "toVowel": 5 },
      { "index": 2, "toVowel": 5 } ],
     "suffix": ""
@@ -16,17 +15,15 @@
   "infinitivePurposeConstruction": {
     "prefix": "ይ",
     "vowelChange": [
-     { "index": 0, "toVowel": 5 },
      { "index": 1, "toVowel": 5 },
-     { "index": 2, "toVowel": 5 }],
+     { "index": 2, "toVowel": 5 } ],
     "suffix": ""
   },
   "jussive": {
     "prefix": "ይ",
     "vowelChange": [
-     { "index": 0, "toVowel": 5 },
      { "index": 1, "toVowel": 5 },
-     { "index": 2, "toVowel": 5 }],
+     { "index": 2, "toVowel": 5 } ],
     "suffix": ""
   }
 }
