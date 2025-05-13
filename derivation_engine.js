@@ -5,12 +5,12 @@ const path = require("path");
 
 // A simplified vowel map (index is the vowel form)
 const vowelMap = {
-  "ሀ" : ["ሀ", "ሁ", "ሂ", "ሃ", "ሄ", "ህ", "ሆ"] , 
+"ሀ" : ["ሀ", "ሁ", "ሂ", "ሃ", "ሄ", "ህ", "ሆ"] , 
 "ለ" : ["ለ", "ሉ", "ሊ", "ላ", "ሌ", "ል", "ሎ"] , 
 "ሐ" : ["ሐ", "ሑ", "ሒ","ሓ","ሔ","ሕ","ሖ"] , 
 "መ" :["መ","ሙ","ሚ","ማ","ሜ","ም","ሞ"],
- "ሠ" :["ሠ","ሡ","ሢ","ሣ","ሤ","ሥ","ሦ"] ,
- "ረ" : ["ረ", "ሩ", "ሪ", "ራ", "ሬ", "ር", "ሮ"] , 
+"ሠ" :["ሠ","ሡ","ሢ","ሣ","ሤ","ሥ","ሦ"] ,
+"ረ" : ["ረ", "ሩ", "ሪ", "ራ", "ሬ", "ር", "ሮ"] , 
 "ሰ" : ["ሰ", "ሱ", "ሲ", "ሳ", "ሴ", "ስ", "ሶ"] , 
 "ሸ" : ["ሸ", "ሹ", "ሺ", "ሻ", "ሼ", "ሽ", "ሾ"] , 
 "ቀ" : ["ቀ", "ቁ", "ቂ", "ቃ", "ቄ", "ቅ", "ቆ"]  , 
@@ -23,21 +23,21 @@ const vowelMap = {
 "አ" : ["አ", "ኡ", "ኢ", "ኣ", "ኤ", "እ", "ኦ"] , 
 "ከ" : ["ከ", "ኩ", "ኪ", "ካ", "ኬ", "ክ", "ኮ"] , 
 "ኸ" :["ኸ","ኹ","ኺ","ኻ","ኼ","ኽ","ኾ"] ,
- "ወ" : ["ወ", "ዉ", "ዊ", "ዋ","ዌ","ው","ዎ"] ,
- "ዐ" : ["ዐ", "ዑ", "ዒ", "ዓ", "ዔ", "ዕ", "ዖ"] ,
- "ዘ" : ["ዘ", "ዙ", "ዚ", "ዛ", "ዜ", "ዝ", "ዞ"] ,
- "ዠ" : ["ዠ", "ዡ","ዢ","ዣ","ዤ","ዥ","ዦ"] ,
- "የ" : ["የ", "ዩ", "ዪ", "ያ", "ዬ", "ይ", "ዮ"] ,
- "ደ" : ["ደ", "ዱ", "ዲ", "ዳ", "ዴ", "ድ","ዶ"],
-  "ጀ" : ["ጀ", "ጁ", "ጂ", "ጃ","ጄ","ጅ","ጆ"] ,      
-  "ገ": ["ገ","ጉ","ጊ","ጋ","ጌ","ግ","ጎ"] ,
+"ወ" : ["ወ", "ዉ", "ዊ", "ዋ","ዌ","ው","ዎ"] ,
+"ዐ" : ["ዐ", "ዑ", "ዒ", "ዓ", "ዔ", "ዕ", "ዖ"] ,
+"ዘ" : ["ዘ", "ዙ", "ዚ", "ዛ", "ዜ", "ዝ", "ዞ"] ,
+"ዠ" : ["ዠ", "ዡ","ዢ","ዣ","ዤ","ዥ","ዦ"] ,
+"የ" : ["የ", "ዩ", "ዪ", "ያ", "ዬ", "ይ", "ዮ"] ,
+"ደ" : ["ደ", "ዱ", "ዲ", "ዳ", "ዴ", "ድ","ዶ"],
+"ጀ" : ["ጀ", "ጁ", "ጂ", "ጃ","ጄ","ጅ","ጆ"] ,      
+"ገ": ["ገ","ጉ","ጊ","ጋ","ጌ","ግ","ጎ"] ,
 "ጠ" :["ጠ","ጡ","ጢ","ጣ","ጤ","ጥ","ጦ"],
 "ጨ" :["ጨ","ጩ","ጪ","ጫ","ጬ","ጭ","ጮ"],
- "ጰ" : ["ጰ", "ጱ", "ጲ", "ጳ", "ጴ", "ጵ", "ጶ"] ,
- "ጸ" : ["ጸ", "ጹ", "ጺ", "ጻ", "ጼ", "ጽ", "ጾ"] ,
- "ፀ" : ["ፀ", "ፁ", "ፂ", "ፃ", "ፄ", "ፅ", "ፆ"] ,
- "ፈ" : ["ፈ", "ፉ", "ፊ", "ፋ", "ፌ", "ፍ", "ፎ"] ,
- "ፐ" : ["ፐ", "ፑ", "ፒ", "ፓ", "ፔ", "ፕ", "ፖ"] , 
+"ጰ" : ["ጰ", "ጱ", "ጲ", "ጳ", "ጴ", "ጵ", "ጶ"] ,
+"ጸ" : ["ጸ", "ጹ", "ጺ", "ጻ", "ጼ", "ጽ", "ጾ"] ,
+"ፀ" : ["ፀ", "ፁ", "ፂ", "ፃ", "ፄ", "ፅ", "ፆ"] ,
+"ፈ" : ["ፈ", "ፉ", "ፊ", "ፋ", "ፌ", "ፍ", "ፎ"] ,
+"ፐ" : ["ፐ", "ፑ", "ፒ", "ፓ", "ፔ", "ፕ", "ፖ"] , 
 };
 
 // Invert the vowel map to identify the root and vowel index
@@ -69,10 +69,11 @@ function applyRule(word, rule) {
 
   const derived = {};
 
-  for (const form of ["infinitive", "past", "jussive", "future"]) {
+  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive"]) {
     const { prefix, suffix, vowelChange } = rule[form];
     let newLetters = [...letters];
-
+    let newDecomposed = [...decomposed];
+/*
     if (vowelChange) {
       const change = decomposed[vowelChange.index];
       if (change) {
@@ -80,12 +81,23 @@ function applyRule(word, rule) {
         if (newChar) newLetters[vowelChange.index] = newChar;
       }
     }
+*/
+    if (vowelChange) {
+      const changes = Array.isArray(vowelChange) ? vowelChange : [vowelChange];
+      changes.forEach(change => {
+        const info = newDecomposed[change.index];
+        if (info && vowelMap[info.base]) {
+          newLetters[change.index] = vowelMap[info.base][change.toVowel];
+        }
+      });
+    }
 
     derived[form] = `${prefix || ""}${newLetters.join("")}${suffix || ""}`;
   }
 
   return derived;
 }
+
 
 // Load all rule JSONs
 function loadAllRules() {
@@ -109,8 +121,8 @@ function deriveWord(word) {
 }
 
 // Example Tests
-deriveWord("መጣ");  // rule 1
-deriveWord("ካደ");  // rule 2
-deriveWord("ተኮሰ"); // rule 3
+deriveWord("ቀተለ"); // rule 1
+deriveWord("ቀደሰ"); // rule 2
+deriveWord("ተንበለ"); // rule 3
 deriveWord("ባረከ"); // rule 4
 deriveWord("ሄደ");  // no match

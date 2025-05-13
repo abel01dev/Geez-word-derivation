@@ -1,23 +1,32 @@
 {
-  "conditions": { "length": 2, "firstVowelIndex": 3 },
-  "infinitive": {
-    "prefix": "መ",
-    "vowelChange": { "index": 1, "toVowel": 5 },
-    "suffix": "ት"
-  },
-  "past": {
+  "conditions": { "length": 4, "firstVowelIndex": 0 },
+  "pastTense": {
     "prefix": "",
-    "vowelChange": { "index": 0, "toVowel": 3 },
+    "vowelChange": null,
+    "suffix": ""
+  },
+  "futureTense": {
+    "prefix": "ይ",
+    "vowelChange": [
+     { "index": 0, "toVowel": 0 },
+     { "index": 1, "toVowel": 5 },
+     { "index": 2, "toVowel": 5 } ],
+    "suffix": ""
+  },
+  "infinitivePurposeConstruction": {
+    "prefix": "ይ",
+    "vowelChange": [
+     { "index": 0, "toVowel": 5 },
+     { "index": 1, "toVowel": 5 },
+     { "index": 2, "toVowel": 5 }],
     "suffix": ""
   },
   "jussive": {
-    "prefix": "አይ",
-    "vowelChange": { "index": 1, "toVowel": 2 },
-    "suffix": "ን"
-  },
-  "future": {
     "prefix": "ይ",
-    "vowelChange": { "index": 1, "toVowel": 2 },
-    "suffix": "ናል"
+    "vowelChange": [
+     { "index": 0, "toVowel": 5 },
+     { "index": 1, "toVowel": 5 },
+     { "index": 2, "toVowel": 5 }],
+    "suffix": ""
   }
 }
