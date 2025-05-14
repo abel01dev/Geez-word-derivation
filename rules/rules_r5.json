@@ -1,4 +1,5 @@
 {
+  "id": 5,
   "conditions": { "length": 4, "firstVowelIndex": 3 },
   "pastTense": {
     "prefix": "",

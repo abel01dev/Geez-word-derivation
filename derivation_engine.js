@@ -114,32 +114,62 @@ function applyRule(word, rule) {
 
 // Load all rule JSONs
 function loadAllRules() {
-  const ruleDir = __dirname;
-  const ruleFiles = ["rules/rules_r1.json", "rules/rules_r2.json", "rules/rules_r3.json", "rules/rules_r4.json","rules/rules_r5.json", "rules/rules_r6.json", "rules/rules_r7.json", "rules/rules_r8.json"];
-  return ruleFiles.map(file => JSON.parse(fs.readFileSync(path.join(ruleDir, file), "utf-8")));
+  const ruleDir = path.join(__dirname, "rules");
+  const ruleFiles = fs.readdirSync(ruleDir);
+  const rules = {};
+
+  ruleFiles.forEach(file => {
+    const rule = JSON.parse(fs.readFileSync(path.join(ruleDir, file), "utf-8"));
+    if (rule.id) rules[rule.id] = rule;
+  });
+
+  return rules;
 }
 
+
 // Test
-function deriveWord(word) {
+function deriveWord(word, ruleId = null) {
   const rules = loadAllRules();
-  for (const rule of rules) {
-    const derived = applyRule(word, rule);
+
+  if (ruleId) {
+    const rule = rules[ruleId];
+    if (rule) {
+      const derived = applyRule(word, rule);
+      if (derived) {
+        console.log(`✅ Word "${word}" derived using rule ID ${ruleId}`);
+        console.table(derived);
+        return;
+      } else {
+        console.log(`❌ Rule ID ${ruleId} does not match "${word}"`);
+        return;
+      }
+    } else {
+      console.log(`❌ Rule ID ${ruleId} not found.`);
+      return;
+    }
+  }
+
+  // Fallback: auto-match
+  for (const id in rules) {
+    const derived = applyRule(word, rules[id]);
     if (derived) {
-      console.log(`✅ Word "${word}" matched rule:`);
+      console.log(`✅ Word "${word}" auto-matched with rule ID ${id}`);
       console.table(derived);
       return;
     }
   }
-  console.log(`❌ No rule matched for "${word}".`);
+
+  console.log(`❌ No matching rule found for "${word}"`);
 }
 
+
 // Example Tests
-deriveWord("ቀተለ"); // rule 1
-deriveWord("ቀደሰ"); // rule 2
-deriveWord("ተንበለ"); // rule 3
-deriveWord("ባረከ"); // rule 4
-deriveWord("ማህረከ"); // rule 5
-deriveWord("ሴሰየ"); // rule 6
-deriveWord("ክህለ"); // rule 7
-deriveWord("ጦመረ"); // rule 8
-deriveWord("ሄደ");  // no match
+deriveWord("ቀተለ",1); // rule 1
+deriveWord("ቀደሰ",2); // rule 2
+deriveWord("ተንበለ",3); // rule 3
+deriveWord("ባረከ",4); // rule 4
+deriveWord("ማህረከ",5); // rule 5
+deriveWord("ሴሰየ",6); // rule 6
+deriveWord("ክህለ",7); // rule 7
+deriveWord("ጦመረ",8); // rule 8
+deriveWord("ሄደ",1);  // no match
