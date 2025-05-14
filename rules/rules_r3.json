@@ -32,5 +32,12 @@
      { "index": 2, "toVowel": 5 },
      { "index": 3, "toVowel": 5 }],
     "suffix": ""
+  },
+  "infinitiveOrGerund": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 2, "toVowel": 5 },
+     { "index": 3, "toVowel": 6 }],
+    "suffix": ""
   }
 }

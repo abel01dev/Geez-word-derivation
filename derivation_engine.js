@@ -73,19 +73,11 @@ function applyRule(word, rule) {
 
   const derived = {};
 
-  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive"]) {
+  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive","infinitiveOrGerund"]) {
     const { prefix, suffix, vowelChange } = rule[form];
     let newLetters = [...letters];
     let newDecomposed = [...decomposed];
-/*
-    if (vowelChange) {
-      const change = decomposed[vowelChange.index];
-      if (change) {
-        const newChar = vowelMap[change.base]?.[vowelChange.toVowel];
-        if (newChar) newLetters[vowelChange.index] = newChar;
-      }
-    }
-*/
+
     if (vowelChange) {
       const changes = Array.isArray(vowelChange) ? vowelChange : [vowelChange];
       changes.forEach(change => {
@@ -111,7 +103,6 @@ function applyRule(word, rule) {
   return derived;
 }
 
-
 // Load all rule JSONs
 function loadAllRules() {
   const ruleDir = path.join(__dirname, "rules");
@@ -125,7 +116,6 @@ function loadAllRules() {
 
   return rules;
 }
-
 
 // Test
 function deriveWord(word, ruleId = null) {
@@ -161,7 +151,6 @@ function deriveWord(word, ruleId = null) {
 
   console.log(`❌ No matching rule found for "${word}"`);
 }
-
 
 // Example Tests
 deriveWord("ቀተለ",1); // rule 1
