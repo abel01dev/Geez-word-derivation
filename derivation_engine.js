@@ -73,7 +73,7 @@ function applyRule(word, rule) {
 
   const derived = {};
 
-  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive","infinitiveOrGerund"]) {
+  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive","infinitiveOrGerund","converb"]) {
     const { prefix, suffix, vowelChange } = rule[form];
     let newLetters = [...letters];
     let newDecomposed = [...decomposed];
@@ -162,3 +162,4 @@ deriveWord("ሴሰየ",6); // rule 6
 deriveWord("ክህለ",7); // rule 7
 deriveWord("ጦመረ",8); // rule 8
 deriveWord("ሄደ",1);  // no match
+

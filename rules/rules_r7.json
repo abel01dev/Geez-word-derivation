@@ -25,13 +25,20 @@
     "vowelChange": [
      { "index": 1, "toVowel": 0 },
      { "index": 2, "toVowel": 5 } ],
-    "suffix": ""
+    "suffix": "" 
   },
   "infinitiveOrGerund": {
     "prefix": "",
     "vowelChange": [
      { "index": 1, "toVowel": 2 },
      { "index": 2, "toVowel": 5 }],
+    "suffix": "ት"
+  }, 
+  "converb": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 1, "toVowel": 2 },
+     { "index": 2, "toVowel": 6 }],
     "suffix": ""
   }
 }
