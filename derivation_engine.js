@@ -73,7 +73,17 @@ function applyRule(word, rule) {
 
   const derived = {};
 
-  for (const form of ["pastTense", "futureTense", "infinitivePurposeConstruction", "jussive","infinitiveOrGerund","converb"]) {
+  for (const form of [
+    "pastTense", 
+    "futureTense", 
+    "infinitivePurposeConstruction", 
+    "jussive",
+    "infinitiveOrGerund",
+    "converb",
+    "descriptiveNounSingleMen",
+    "descriptiveNounPluralMen",
+    "descriptiveNounSingleWoman",
+    "descriptiveNounPluralWoman" ]) {
     const { prefix, suffix, vowelChange } = rule[form];
     let newLetters = [...letters];
     let newDecomposed = [...decomposed];
