@@ -83,7 +83,11 @@ function applyRule(word, rule) {
     "descriptiveNounSingleMen",
     "descriptiveNounPluralMen",
     "descriptiveNounSingleWoman",
-    "descriptiveNounPluralWoman" ]) {
+    "descriptiveNounPluralWoman",
+    "nominalAdjectiveSingleMen",
+    "nominalAdjectivePluralMen",
+    "nominalAdjectiveSingleWoman",
+    "nominalAdjectivePluralWoman" ]) {
     const { prefix, suffix, vowelChange } = rule[form];
     let newLetters = [...letters];
     let newDecomposed = [...decomposed];

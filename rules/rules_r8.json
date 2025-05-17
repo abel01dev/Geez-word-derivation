@@ -68,5 +68,39 @@
      { "index": 1, "toVowel": 3 },
      { "index": 2, "toVowel": 5 }],
     "suffix": "ያት"
+  },
+  "nominalAdjectiveSingleMen": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 0, "toVowel": 1 },
+     { "index": 1, "toVowel": 1 },
+     { "index": 2, "toVowel": 5 }],
+    "suffix": ""
+  },
+  "nominalAdjectivePluralMen": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 0, "toVowel": 1 },
+     { "index": 1, "toVowel": 1 },
+     { "index": 2, "toVowel": 3 }],
+    "suffix": "ን"
+  },
+  "nominalAdjectiveSingleWoman": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 0, "toVowel": 1 },
+     { "index": 1, "toVowel": 5 },
+     { "index": 2, "toVowel": 5 }],
+    "suffix": "ት"
+  },
+  "nominalAdjectivePluralWoman": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 0, "toVowel": 1 },
+     { "index": 1, "toVowel": 1 },
+     { "index": 2, "toVowel": 3 }],
+    "suffix": "ት"
   }
+
 }
+
