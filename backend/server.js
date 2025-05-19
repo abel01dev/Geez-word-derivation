@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 const PORT = 5000;
 
-const { deriveWord, loadAllRules } = require('./derivation_engine'); // Make sure this path is correct
+const { deriveWord, loadAllRules } = require('./derivation_engine');
 
 app.use(cors());
 app.use(express.json());
@@ -20,7 +20,7 @@ app.post('/derive', (req, res) => {
   const ruleIdNum = parseInt(ruleId, 10);
 
   try {
-    const result = deriveWord(root, ruleIdNum); // ✅ corrected function name
+    const result = deriveWord(root, ruleIdNum);
 
     console.log("🛠️ Derived result:", result);
 
