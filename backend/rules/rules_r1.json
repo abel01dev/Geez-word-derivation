@@ -30,7 +30,14 @@
     "suffix": ""
   }
   ,
-  "infinitiveOrGerund": {
+  "infinitiveOrGerundA": {
+    "prefix": "",
+    "vowelChange": [
+     { "index": 1, "toVowel": 2 },
+     { "index": 2, "toVowel": 5 }],
+    "suffix": ""
+  },
+  "infinitiveOrGerundB": {
     "prefix": "",
     "vowelChange": [
      { "index": 1, "toVowel": 2 },
