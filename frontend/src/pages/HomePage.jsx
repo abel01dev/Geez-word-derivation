@@ -23,6 +23,23 @@ import { MdContactSupport } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { FaFileDownload } from "react-icons/fa";
 
+const formLabels = {
+    pastTense: "ኀላፊ አንቀጽ",
+    futureTense: "ትንቢት አንቀጽ",
+    infinitivePurposeConstruction: "ዘንድ አንቀጽ",
+    jussive: "ትእዛዝ አንቀጽ",
+    infinitiveOrGerundA: "አርእስት(ሀ)",
+    infinitiveOrGerundB: "አርእስት(ለ)",
+    converb: "ቦዝ አንቀጽ",
+    descriptiveNounSingleMen: "ሳልስ ውስተ ዘ ወንድ",
+    descriptiveNounPluralMen: "ሳልስ ውስተ ዘ ወንድ ለብዙ",
+    descriptiveNounSingleWoman: " ሳልስ ወስተ ዘ ሴት",
+    descriptiveNounPluralWoman: "ሳልስ ውስተ ዘ ሴት ለብዙ",
+    nominalAdjectiveSingleMen: "ሳድስ ውስተ ዘ ወንድ",
+    nominalAdjectivePluralMen: "ሳድስ ውስተ ዘ ወንድ ብዙ",
+    nominalAdjectiveSingleWoman: "ሳድስ ውስተ ዘ ሴት",
+    nominalAdjectivePluralWoman: "ሳድስ ውስተ ዘ ሴት ብዙ",
+};
 
 export default function DerivationApp() {
   const [inputWord, setInputWord] = useState("");
@@ -253,7 +270,7 @@ fontWeight="bold"
               {Object.entries(result).map(([form, value]) => (
                 <Tr key={form}>
 <Td fontSize={{ base: "sm", md: "sm" }} color={formTextColor}>
-  {form}
+  {formLabels[form] || form}
 </Td>
                   <Td fontSize={{ base: "sm", md: "lg" }} color="black">{value}</Td>
                 </Tr>
