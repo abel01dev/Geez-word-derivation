@@ -65,7 +65,6 @@ function applyRule(word, rule) {
   const derived = {};
 
   for (const form of [
-    
     "pastTense", 
     "futureTense", 
     "infinitivePurposeConstruction", 

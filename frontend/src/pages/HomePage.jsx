@@ -1,28 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./animations.css";
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  Text,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  VStack,
-  Flex,
-  useColorModeValue
+import { Box, Button, FormControl, FormLabel, Input, Select, Text, Table, Thead, Tbody, Tr,Th, Td, VStack, Flex, useColorModeValue
 } from "@chakra-ui/react";
 import axios from "axios";
 import { MdContactSupport } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { FaFileDownload } from "react-icons/fa";
-
+import WordHistory from "../components/WordHistory";
+const formLabels = {
+    pastTense: "ኀላፊ አንቀጽ",
+    futureTense: "ትንቢት አንቀጽ",
+    infinitivePurposeConstruction: "ዘንድ አንቀጽ",
+    jussive: "ትእዛዝ አንቀጽ",
+    infinitiveOrGerundA: "አርእስት(ሀ)",
+    infinitiveOrGerundB: "አርእስት(ለ)",
+    converb: "ቦዝ አንቀጽ",
+    descriptiveNounSingleMen: "ሳልስ ውስተ ዘ ወንድ",
+    descriptiveNounPluralMen: "ሳልስ ውስተ ዘ ወንድ ለብዙ",
+    descriptiveNounSingleWoman: " ሳልስ ወስተ ዘ ሴት",
+    descriptiveNounPluralWoman: "ሳልስ ውስተ ዘ ሴት ለብዙ",
+    nominalAdjectiveSingleMen: "ሳድስ ውስተ ዘ ወንድ",
+    nominalAdjectivePluralMen: "ሳድስ ውስተ ዘ ወንድ ብዙ",
+    nominalAdjectiveSingleWoman: "ሳድስ ውስተ ዘ ሴት",
+    nominalAdjectivePluralWoman: "ሳድስ ውስተ ዘ ሴት ብዙ",
+};
+const API_URL = 'http://192.168.100.43:5000';
 
 export default function DerivationApp() {
   const [inputWord, setInputWord] = useState("");
@@ -30,26 +32,36 @@ export default function DerivationApp() {
   const [result, setResults] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const historyRef = useRef();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    //setResults([]);
-setLoading(true);
+    setLoading(true);
+    
     try {
-      const response = await axios.post("http://localhost:5000/derive", {
+      const response = await axios.post(`${API_URL}/derive`, {
         word: inputWord,
         ruleId,
       });
-    setTimeout(() => {
-setResults((prev) => [response.data, ...prev]); // Append new result (FIFO)
-      setLoading(false);
+
+      setTimeout(() => {
+        if (response.data) {
+          setResults(prev => [response.data, ...prev]);
+          setError(null);
+          // Refresh history after successful derivation
+          historyRef.current?.fetchHistory();
+        } else {
+          setError("No result returned from server");
+        }
+        setLoading(false);
       }, 2500);
-      
     } catch (err) {
-     setTimeout(() =>{
-      setError(err.response?.data?.error || "An error occurred.");
-      setLoading(false); }, 2500); 
+      setTimeout(() => {
+        console.error("Error details:", err);
+        setError(err.response?.data?.error || "An error occurred while processing your request");
+        setLoading(false);
+      }, 2500);
     }
   };
   const handlerClear = () => {
@@ -58,6 +70,31 @@ setResults((prev) => [response.data, ...prev]); // Append new result (FIFO)
     setResults([]);
     setRuleId("");
   }
+  const handleHistoryClick = async (item) => {
+    // Set the input values
+    setInputWord(item.word);
+    setRuleId(item.ruleId);
+
+    // Find existing result
+    const existingResultIndex = result.findIndex(r => 
+      r.pastTense === item.derivedWord || 
+      Object.values(r).some(value => value === item.derivedWord)
+    );
+
+    if (existingResultIndex !== -1) {
+      // If result exists, move it to the top
+      const existingResult = result[existingResultIndex];
+      setResults(prev => [
+        existingResult,
+        ...prev.slice(0, existingResultIndex),
+        ...prev.slice(existingResultIndex + 1)
+      ]);
+    } else {
+      // Only if we don't have the result, make a new request
+      handleSubmit(new Event('submit'));
+    }
+  };
+
    // ---- Download as .txt ----
  const downloadAsTxt = () => {
   let content = "";
@@ -79,12 +116,9 @@ setResults((prev) => [response.data, ...prev]); // Append new result (FIFO)
   URL.revokeObjectURL(url);
 };
 
- 
-
-
-const resultBg = useColorModeValue("white.5000", "gray.500") ;
+const resultBg = useColorModeValue("white.5000", "242322") ;
+const resultcolor=  useColorModeValue("gray.800", "#FFFFFF")
 const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in dark mode
-
 
   return (
 <Box
@@ -95,43 +129,49 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
   bg={useColorModeValue("gray.100", "#121212")}
   color={useColorModeValue("black", "white")}
 >
-      <Box w="100%" maxW="1200px" mx="auto"    p={{ base: 4, md: 8 }}  borderRadius="xl" >
-      <Box as="form" onSubmit={handleSubmit}  maxW="1200px"
+      <Flex
         w="100%"
+        maxW="1400px"
         mx="auto"
-px={{ base: 4, md: 8 }} // more breathing room on mobile
-  py={{ base: 4, md: 8 }}       bg="#f8f8f8"
-        borderRadius="xl"
-        boxShadow="md"
-        position="relative">
-          <Box position="absolute" top={{ base: 8, md: 14 }} right={{ base: 18, md: 14 }}>
-    <Link to="/support">
-      <Button
-        aria-label="Contact Support"
-        borderRadius="full"
-              size={{ base: "xs", md: "sm" }}
-
-        colorScheme="teal">
-        <MdContactSupport />
-      
-      </Button>
-    </Link>
-  </Box>
-        <VStack spacing={4} align="stretch">
-          {/* Simulating a fieldset using Box */}
-          <Box border="1px solid" borderColor="gray.200" p={4} borderRadius="35" bg="#FDDB92">
-            <Text textAlign="center"   fontSize={{ base: "x", md: "3xl" }}
- fontWeight="bold" mb={{base:21, md:16}}>Enter your Root Word And Rule</Text>
-              <Box
-  w={{ base: "100%", md: "600px" }} // shorter width container
-  mx="auto"
-  p={{base:4, md:4}}
-  //bg="white"
-  borderRadius="md"
-  boxShadow="sm"
-  bg={{ base: "gray.100", md: "gray.300" }}
-  mb={{ base: 4, md: 6 }}
->
+        gap={6}
+        direction={{ base: "column", lg: "row" }}
+      >
+        {/* Main content */}
+        <Box flex="3" marginLeft="300px">
+          <Box as="form" onSubmit={handleSubmit}  maxW="1200px"
+            w="100%"
+            mx="auto"
+            px={{ base: 4, md: 8 }} // more breathing room on mobile
+             py={{ base: 4, md: 8 }}       bg="#f8f8f8"
+            borderRadius="xl"
+            boxShadow="md"
+            position="relative">
+            <Box position="absolute" top={{ base: 8, md: 14 }} right={{ base: 18, md: 14 }}>
+      <Link to="/support">
+        <Button
+                aria-label="Contact Support"
+                borderRadius="full"
+                size={{ base: "xs", md: "sm" }}
+                 colorScheme="teal">
+          <MdContactSupport />
+        
+        </Button>
+      </Link>
+    </Box>
+            <VStack spacing={4} align="stretch">
+              {/* Simulating a fieldset using Box */}
+              <Box border="1px solid" borderColor="gray.200" p={4} borderRadius="35" bg="#FDDB92">
+                <Text textAlign="center"   fontSize={{ base: "x", md: "3xl" }}
+  fontWeight="bold" mb={{base:21, md:16}}>Enter your Root Word And Rule</Text>
+                <Box
+                  w={{ base: "100%", md: "600px" }} // shorter width container
+                   mx="auto"
+                    p={{base:4, md:4}}
+                    borderRadius="md"
+                    boxShadow="sm"
+                        bg={{ base: "gray.00", md: "gray.0" }}
+                       mb={{ base: 4, md: 6 }}
+                    >
   <Flex gap={4} align="center">
     <FormControl isRequired flex="1">
       <FormLabel fontSize={{ base: "sm", md: "md" }}>Ge'ez Root Word</FormLabel>
@@ -164,112 +204,118 @@ px={{ base: 4, md: 8 }} // more breathing room on mobile
     </FormControl>
   </Flex>
 </Box>
-            <Flex justifyContent="flex-end" mt="auto" gap={2} irection={{ base: "column", md: "row" }}>
-            
-              <Button
-                type="submit"
-                colorScheme="blue"
-                position="relative"
-    size={{ base: "sm", md: "md" }}
-    width={{ base: "100%", md: "150px" }}
-                isLoading={loading}
-                isDisabled={loading}
-                loadingText="Generating..."
-              >
-                {loading ? "Generating..." : "Generate"}
-              </Button>
-                          <Button
-    colorScheme="gray"
-    onClick={handlerClear}
-    isDisabled={loading}
-    size={{ base: "sm", md: "md" }}
-    width={{ base: "100%", md: "auto" }}
-  >
-  Clear All
-</Button>
+                <Flex justifyContent="flex-end" mt="auto" gap={2} irection={{ base: "column", md: "row" }}>
+                  <Button
+                    type="submit"
+                    colorScheme="blue"
+                    position="relative"
+                    size={{ base: "sm", md: "md" }}
+                    width={{ base: "100%", md: "150px" }}
+                    isLoading={loading}
+                    isDisabled={loading}
+                    loadingText="Generating..."
+                  >
+                    {loading ? "Generating..." : "Generate"}
+                  </Button>
+                            <Button
+                               colorScheme="gray"
+                                onClick={handlerClear}
+                                isDisabled={loading}
+                                 size={{ base: "sm", md: "md" }}
+                                width={{ base: "100%", md: "auto" }}
+                                         >
+                                         Clear All
+                          </Button>
 
-            </Flex>
-            {
-              loading && (
-                <Box display="flex" justifyContent="center" mt={6}>
-                  <div className="ring"></div>
-                  </Box>
-              )
-            }
+                </Flex>
+                {
+                  loading && (
+                    <Box display="flex" justifyContent="center" mt={6}>
+                      <div className="ring"></div>
+                      </Box>
+                  )
+                }
+              </Box>
+            </VStack>
           </Box>
-        </VStack>
-      </Box>
 
-      {/* Result section */}
-      {result.length > 0 && !loading && result.map ((result, index) => (
-        <Box key={index} mt={8}  bg={resultBg}
+          {/* Result section */}
+          {result.length > 0 && !loading && result.map ((result, index) => (
+            <Box key={index} mt={8}  bg={resultBg}
+             color={resultcolor}
+              py={6}
+              px={4}
+              maxW="1500px"
+              w="90%"
+              mx="auto"
+              borderRadius="xl"
+              boxShadow="lg">
+              <Text fontSize="lg" fontWeight="semibold" mb={2}>
+                {index }
+              </Text>
+               <Flex gap={4} mb={4} justifyContent="flex-end" wrap="wrap">
+                <Button onClick={downloadAsTxt} size="sm" colorScheme="red">
+                 <FaFileDownload />
+                </Button>
+              </Flex>
+              <Table variant="simple" size={{base: "sm", md: "md"}}>
+               <Thead>
+                 <Tr>
+                   <Th 
+                            bgGradient="linear(to-r, orange.300, yellow.200)"
+                            color="gray.800"
+                           fontWeight="bold"
+                            fontSize={{ base: "sm", md: "md" }}
+                     >
+                 Form
+                     </Th>
+                     <Th 
+                   bgGradient="linear(to-l, orange.300, yellow.200)"
+                      color="gray.800"
+                        fontWeight="bold"
+        fontSize={{ base: "sm", md: "md" }}
+      >
+        Derived Word
+      </Th>
+    </Tr>
+  </Thead>
 
+              <Tbody>
+                {Object.entries(result).map(([form, value]) => (
+                  <Tr key={form}>
+  <Td fontSize={{ base: "sm", md: "sm" }} color={formTextColor}>
+  {formLabels[form] || form}  </Td>
+                    <Td fontSize={{ base: "sm", md: "xl" }} >{value}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+          ))}
 
-         color="white"
-          py={6}
-          px={4}
-          maxW="1500px"
-          w="90%"
-          mx="auto"
-          borderRadius="xl"
-          boxShadow="lg">
-          <Text fontSize="lg" fontWeight="semibold" mb={2}>
-            {index }
-          </Text>
-           <Flex gap={4} mb={4} justifyContent="flex-end" wrap="wrap">
-            <Button onClick={downloadAsTxt} size="sm" colorScheme="red">
-             <FaFileDownload />
-            </Button>
-           
-          
-          </Flex>
-          <Table variant="simple" size={{base: "sm", md: "md"}}>
-           <Thead>
-  <Tr>
-    <Th 
-bgGradient="linear(to-r, orange.300, yellow.200)"
-color="gray.800"
-fontWeight="bold"
-    //  color="black"
-      fontSize={{ base: "sm", md: "md" }}
-     // fontWeight="bold"
-    >
-      Form
-    </Th>
-    <Th 
-bgGradient="linear(to-l, orange.300, yellow.200)"
-color="gray.800"
-fontWeight="bold"
-    //  color="black"
-      fontSize={{ base: "sm", md: "md" }}
-    //  fontWeight="bold"
-    >
-      Derived Word
-    </Th>
-  </Tr>
-</Thead>
-
-            <Tbody>
-              {Object.entries(result).map(([form, value]) => (
-                <Tr key={form}>
-<Td fontSize={{ base: "sm", md: "sm" }} color={formTextColor}>
-  {form}
-</Td>
-                  <Td fontSize={{ base: "sm", md: "lg" }} color="black">{value}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          {/* Error message */}
+          {error && !loading && (
+            <Text color="red.500" fontWeight="medium" mt={4}>
+              {error}
+            </Text>
+          )}
         </Box>
-      ))}
 
-      {/* Error message */}
-      {error && !loading && (
-        <Text color="red.500" fontWeight="medium" mt={4}>
-          {error}
-        </Text>
-      )}
-      </Box>
+        {/* Word History Sidebar */}
+        <Box 
+        position="fixed"  // instead of "sticky"
+  left="0"         // stick to left edge
+ top="235px"        // adjust this value based on your navbar height
+  bottom="60px"  
+  width="350px"    // fixed width
+  overflowY="auto" // for scrolling
+  borderRight="1px solid" // optional border
+  borderColor="gray.200"
+    display={{ base: "none", lg: "block" }}
+        >
+          <WordHistory ref={historyRef} onSelect={handleHistoryClick} />
+        </Box>
+      </Flex>
     </Box>
   );
 }

@@ -1,16 +1,68 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const { deriveWord, loadAllRules } = require('./derivation_engine');
+const WordHistory = require('./models/WordHistory');
+
 const app = express();
 const PORT = 5000;
 
-const { deriveWord, loadAllRules } = require('./derivation_engine'); // Make sure this path is correct
-
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: ["http://localhost:5173", "http://192.168.100.43:5173"],
+  methods: ['GET', 'POST', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.post('/derive', (req, res) => {
-  console.log('🔍 Received body:', req.body);
+// MongoDB Connection
+mongoose.connect("mongodb://127.0.0.1:27017/geez-word-derivation", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB Connected'))
+.catch(err => {
+  console.error('MongoDB Connection Error:', err);
+  process.exit(1);
+});
 
+// Word History Routes
+app.get('/api/words', async (req, res) => {
+  try {
+    const history = await WordHistory.find().sort({ timestamp: -1 }).limit(10);
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Add DELETE endpoint for clearing history
+app.delete('/api/words', async (req, res) => {
+  try {
+    await WordHistory.deleteMany({});
+    res.status(200).json({ message: 'History cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post('/api/words', async (req, res) => {
+  try {
+    const wordHistory = new WordHistory({
+      originalWord: req.body.originalWord,
+      derivedWord: req.body.derivedWord,
+      pattern: req.body.pattern
+    });
+    const savedHistory = await wordHistory.save();
+    res.status(201).json(savedHistory);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Derivation endpoint
+app.post('/derive', async (req, res) => {
   const { word: root, ruleId } = req.body;
 
   if (!root || !ruleId) {
@@ -20,17 +72,38 @@ app.post('/derive', (req, res) => {
   const ruleIdNum = parseInt(ruleId, 10);
 
   try {
-    const result = deriveWord(root, ruleIdNum); // ✅ corrected function name
-
-    console.log("🛠️ Derived result:", result);
+    const result = deriveWord(root, ruleIdNum);
 
     if (result) {
-      res.json(result); // ✅ simplified to match frontend expectation
+      try {
+        // Use findOneAndUpdate with upsert to prevent duplicates
+        await WordHistory.findOneAndUpdate(
+          {
+            originalWord: root,
+            pattern: `Rule ${ruleIdNum}`
+          },
+          {
+            $set: {
+              derivedWord: result.pastTense || Object.values(result)[0],
+              timestamp: new Date() // Update timestamp on every access
+            }
+          },
+          {
+            upsert: true, // Create if doesn't exist
+            new: true // Return the updated document
+          }
+        );
+        
+        res.json(result);
+      } catch (historyError) {
+        console.error('Error handling history:', historyError);
+        // If there's an error with history, still return the derivation result
+        res.json(result);
+      }
     } else {
       res.status(404).json({ error: `Rule ID ${ruleIdNum} does not match "${root}"` });
     }
   } catch (err) {
-    console.error("❌ Backend error:", err);
     res.status(500).json({ error: err.message || 'Server error' });
   }
 });
@@ -44,4 +117,14 @@ app.get("/api/rules", (req, res) => {
   res.json(list);
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('❌ Server error:', err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Access the API at http://192.168.100.43:${PORT}`);
+});
