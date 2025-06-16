@@ -55,10 +55,10 @@ function applyRule(word, rule) {
   const letters = word.split("");
   const decomposed = decomposeWord(word);
 
-  if (
-    decomposed.length !== rule.conditions.length ||
-    decomposed[0]?.index !== rule.conditions.firstVowelIndex
-  ) {
+  // Check if the word matches the rule conditions
+  if (decomposed.some(info => !info) || 
+      decomposed.length !== rule.conditions.length ||
+      decomposed[0]?.index !== rule.conditions.firstVowelIndex) {
     return null;
   }
 
@@ -78,33 +78,52 @@ function applyRule(word, rule) {
     "nominalAdjectiveSingleMen",
     "nominalAdjectivePluralMen",
     "nominalAdjectiveSingleWoman",
-    "nominalAdjectivePluralWoman" ]) {
-    const { prefix, suffix, vowelChange } = rule[form];
+    "nominalAdjectivePluralWoman"
+  ]) {
+    // Get the transformation rules for this form
+    const { prefix = "", suffix = "", vowelChange = null } = rule[form] || {};
+    
+    // Create copies of the letters and decomposed info
     let newLetters = [...letters];
     let newDecomposed = [...decomposed];
 
+    // Apply vowel changes if any
     if (vowelChange) {
       const changes = Array.isArray(vowelChange) ? vowelChange : [vowelChange];
+      
+      // Apply each vowel change
       changes.forEach(change => {
-        const info = newDecomposed[change.index];
-        if (info && vowelMap[info.base]) {
-          newLetters[change.index] = vowelMap[info.base][change.toVowel];
+        if (change.index >= 0 && change.index < newDecomposed.length) {
+          const info = newDecomposed[change.index];
+          if (info && vowelMap[info.base] && 
+              change.toVowel >= 0 && 
+              change.toVowel < vowelMap[info.base].length) {
+            newLetters[change.index] = vowelMap[info.base][change.toVowel];
+          }
         }
       });
     }
 
-    const deleteIndexes = rule[form].delete || [];
-    deleteIndexes.sort((a, b) => b - a);
-    deleteIndexes.forEach(index => {
-      if (index >= 0 && index < newLetters.length) {
-        newLetters.splice(index, 1);
-      }
-    });
+    // Apply any deletions
+    const deleteIndexes = (rule[form] && rule[form].delete) || [];
+    if (deleteIndexes.length > 0) {
+      deleteIndexes
+        .sort((a, b) => b - a) // Sort in descending order to delete from end to start
+        .forEach(index => {
+          if (index >= 0 && index < newLetters.length) {
+            newLetters.splice(index, 1);
+          }
+        });
+    }
 
-    derived[form] = `${prefix || ""}${newLetters.join("")}${suffix || ""}`;
+    // Construct the derived word
+    const derivedWord = `${prefix}${newLetters.join("")}${suffix}`;
+    if (derivedWord) {
+      derived[form] = derivedWord;
+    }
   }
 
-  return derived;
+  return Object.keys(derived).length > 0 ? derived : null;
 }
 
 function loadAllRules() {

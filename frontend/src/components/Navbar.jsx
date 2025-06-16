@@ -11,7 +11,7 @@ import {
   Skeleton,
   useColorMode,
   useColorModeValue,
-  
+  useBreakpointValue 
 } from "@chakra-ui/react";
 import { FaCircleInfo } from "react-icons/fa6";
 //import { MdContactSupport } from "react-icons/md";
@@ -34,6 +34,7 @@ function ClientOnly({ children, fallback = null }) {
 
 const Navbar = () => {
   const { toggleColorMode, colorMode } = useColorMode();
+const isMobile = useBreakpointValue({ base: true, md: false }); // ✅ Fix added here
 
   return (
    <Box
@@ -43,7 +44,7 @@ const Navbar = () => {
 bg={useColorModeValue("#ffffffcc", "#000000")}
 backdropFilter="blur(35px)"
 >
-  <VStack spacing={6}bgGradient="linear(to-r, #D57500,rgb(189, 151, 115))"
+  <VStack spacing={6}bgGradient="linear-gradient(90deg,rgba(250, 129, 0, 1) 0%, rgba(186, 110, 34, 1) 23%, rgba(163, 157, 157, 1) 50%, rgba(130, 114, 91, 1) 78%, rgba(247, 162, 42, 1) 100%);"
  p={2} borderRadius="4xl" boxShadow="xl">
     <Flex
       w="100%"
@@ -73,14 +74,16 @@ backdropFilter="blur(35px)"
   <Box as="span" className="rotating" color="red.500">Ge’ez</Box>{" "}
   <Box as="span" color="black">Word Derivation</Box>
 </Text>
+<Box maxW={{ base: "100%", md: "100%" }} overflow="hidden">
 
-            <Text mt={1} fontSize={{ base: "xs", md: "md" }} color="gray.900"   className="typing-description"
+            <Text mt="0.5" fontSize={{ base: "xs", md: "md" }} color="gray.900"   className="typing-description"
  >
    
-            Instantly generate derived verb forms from Ge’ez roots.
+  {isMobile ? "Ge’ez verb derivation tool." : "Instantly generate derived verb forms from Ge’ez roots."}
        <Box as="span" className="cursor">|</Box>
 
             </Text>
+            </Box>
           </Box>
           <HStack spacing={2} position={{ base: "absolute", md: "static" }}
     top={{ base: "1", md: "auto" }}
@@ -135,12 +138,13 @@ backdropFilter="blur(35px)"
     }
 
     .typing-description {
-      width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      animation: typing 5s steps(60, end) forwards;
-      font-family: monospace;
       display: inline-block;
+     max-width: 100%;
+      white-space: nowrap;
+       overflow: hidden;
+      animation: typing 4s steps(50, end) forwards;
+      font-family: monospace;
+       display: inline-block;
     }
 
     @keyframes typing {

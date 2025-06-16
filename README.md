@@ -6,7 +6,8 @@ This project consists of a frontend React application and a backend Node.js serv
 
 Before running the project, make sure you have the following installed:
 - [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB Community Edition](https://www.mongodb.com/try/download/community)
+- [MongoDB Community Edition](https://www.mongodb.com/try/download/community)  [v current, window 64, package msi ]
+
 
 ## Setup Instructions
 
@@ -26,9 +27,13 @@ cd backend
 
 # Install dependencies
 npm install
+npm install mongoose
+
+npm install mongoose dotenv ## to install reqiured packages
 
 # Start the server
-npm start
+npm start ## or u can use
+node server.js
 ```
 
 The backend server will run on http://localhost:5000

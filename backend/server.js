@@ -9,7 +9,7 @@ const PORT = 5000;
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:5173", "http://192.168.100.43:5173"],
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
@@ -76,7 +76,7 @@ app.post('/derive', async (req, res) => {
 
     if (result) {
       try {
-        // Use findOneAndUpdate with upsert to prevent duplicates
+        // Save to history
         await WordHistory.findOneAndUpdate(
           {
             originalWord: root,
@@ -85,26 +85,27 @@ app.post('/derive', async (req, res) => {
           {
             $set: {
               derivedWord: result.pastTense || Object.values(result)[0],
-              timestamp: new Date() // Update timestamp on every access
+              timestamp: new Date()
             }
           },
           {
-            upsert: true, // Create if doesn't exist
-            new: true // Return the updated document
+            upsert: true,
+            new: true
           }
         );
         
         res.json(result);
       } catch (historyError) {
-        console.error('Error handling history:', historyError);
-        // If there's an error with history, still return the derivation result
+        // If history fails, still return the derivation
         res.json(result);
       }
     } else {
-      res.status(404).json({ error: `Rule ID ${ruleIdNum} does not match "${root}"` });
+      res.status(404).json({ 
+        error: `Could not derive words for "${root}" using Rule ${ruleIdNum}. Please check if you're using the correct rule for this word type.`
+      });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Server error' });
+    res.status(500).json({ error: 'An error occurred during word derivation.' });
   }
 });
 
@@ -126,5 +127,5 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Access the API at http://192.168.100.43:${PORT}`);
+  console.log(`Access the API at http://localhost:${PORT}`);
 });

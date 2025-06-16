@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 
-const API_URL = "http://192.168.100.43:5000";
+const API_URL = "http://localhost:5000";
 
 const WordHistory = forwardRef(({ onSelect }, ref) => {
   const [history, setHistory] = useState([]);

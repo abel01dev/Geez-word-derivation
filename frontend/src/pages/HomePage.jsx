@@ -7,6 +7,8 @@ import { MdContactSupport } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { FaFileDownload } from "react-icons/fa";
 import WordHistory from "../components/WordHistory";
+import { Repeat, Trash2 } from "lucide-react"; // from lucide-react icon set
+
 const formLabels = {
     pastTense: "ኀላፊ አንቀጽ",
     futureTense: "ትንቢት አንቀጽ",
@@ -24,16 +26,16 @@ const formLabels = {
     nominalAdjectiveSingleWoman: "ሳድስ ውስተ ዘ ሴት",
     nominalAdjectivePluralWoman: "ሳድስ ውስተ ዘ ሴት ብዙ",
 };
-const API_URL = 'http://192.168.100.43:5000';
+const API_URL = 'http://localhost:5000';
 
 export default function DerivationApp() {
   const [inputWord, setInputWord] = useState("");
   const [ruleId, setRuleId] = useState("");
-  const [result, setResults] = useState([]);
+  const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const historyRef = useRef();
-
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -47,7 +49,7 @@ export default function DerivationApp() {
 
       setTimeout(() => {
         if (response.data) {
-          setResults(prev => [response.data, ...prev]);
+          setResult(response.data);
           setError(null);
           // Refresh history after successful derivation
           historyRef.current?.fetchHistory();
@@ -67,45 +69,41 @@ export default function DerivationApp() {
   const handlerClear = () => {
     setInputWord("");
     setError("");
-    setResults([]);
+    setResult(null);
     setRuleId("");
   }
-  const handleHistoryClick = async (item) => {
-    // Set the input values
+const handleHistoryClick = async (item) => {
     setInputWord(item.word);
     setRuleId(item.ruleId);
+    setResult(null);
+    setError(null);
+    setLoading(true);
 
-    // Find existing result
-    const existingResultIndex = result.findIndex(r => 
-      r.pastTense === item.derivedWord || 
-      Object.values(r).some(value => value === item.derivedWord)
-    );
+    try {
+      const response = await axios.post(`${API_URL}/derive`, {
+        word: item.word,
+        ruleId: item.ruleId,
+      });
 
-    if (existingResultIndex !== -1) {
-      // If result exists, move it to the top
-      const existingResult = result[existingResultIndex];
-      setResults(prev => [
-        existingResult,
-        ...prev.slice(0, existingResultIndex),
-        ...prev.slice(existingResultIndex + 1)
-      ]);
-    } else {
-      // Only if we don't have the result, make a new request
-      handleSubmit(new Event('submit'));
+      setTimeout(() => {
+        setResult(response.data);
+        setLoading(false);
+      }, 2500);
+    } catch (historyError) {
+    setTimeout(() => {
+      console.error("History error:", historyError);
+      setError("Failed to regenerate from history.");
+      setLoading(false);
+    }, 2500);
     }
   };
-
    // ---- Download as .txt ----
  const downloadAsTxt = () => {
-  let content = "";
+    let content = "";
 
-  result.forEach((res, index) => {
-    content += `Derived Word Set #${index + 1}\n`;
-    Object.entries(res).forEach(([form, word]) => {
-      content += `${form}: ${word}\n`;
+    Object.entries(result).forEach(([form, word]) => {
+      content += `${formLabels[form] || form}: ${word}\n`;
     });
-    content += `\n`; // Add space between results
-  });
 
   const blob = new Blob([content], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
@@ -133,19 +131,32 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
         w="100%"
         maxW="1400px"
         mx="auto"
-        gap={6}
+        gap={20}
         direction={{ base: "column", lg: "row" }}
       >
         {/* Main content */}
-        <Box flex="3" marginLeft="300px">
+        <Box flex="10">
           <Box as="form" onSubmit={handleSubmit}  maxW="1200px"
             w="100%"
             mx="auto"
-            px={{ base: 4, md: 8 }} // more breathing room on mobile
-             py={{ base: 4, md: 8 }}       bg="#f8f8f8"
+            px={{ base: 4, md: 4 }} // more breathing room on mobile
+             py={{ base: 4, md: 4 }}      
             borderRadius="xl"
             boxShadow="md"
             position="relative">
+               <Button
+          display={{ base: "block", lg: "none" }}
+          position="fixed"
+          bottom="20px"
+          right="20px"
+          zIndex="1000"
+          colorScheme="blue"
+          borderRadius="full"
+          boxShadow="lg"
+          onClick={() => setIsHistoryVisible(!isHistoryVisible)}
+        >
+          {isHistoryVisible ? "Hide H.." : "Show H.."}
+        </Button>
             <Box position="absolute" top={{ base: 8, md: 14 }} right={{ base: 18, md: 14 }}>
       <Link to="/support">
         <Button
@@ -167,27 +178,48 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
                   w={{ base: "100%", md: "600px" }} // shorter width container
                    mx="auto"
                     p={{base:4, md:4}}
-                    borderRadius="md"
-                    boxShadow="sm"
-                        bg={{ base: "gray.00", md: "gray.0" }}
+                    borderRadius="2xl"
+                    boxShadow="0 6px 26px rgba(0, 0, 0, 0.1)"
+                     bg={useColorModeValue("gray.50", "gray.800")}
                        mb={{ base: 4, md: 6 }}
                     >
-  <Flex gap={4} align="center">
-    <FormControl isRequired flex="1">
-      <FormLabel fontSize={{ base: "sm", md: "md" }}>Ge'ez Root Word</FormLabel>
-      <Input
-          size={{ base: "sm", md: "md" }}
-        placeholder="Enter Ge'ez root word"
-        value={inputWord}
-        onChange={(e) => setInputWord(e.target.value)}
-      />
+                        <Flex
+                          w="100%"
+                           wrap={{ base: "wrap", md: "nowrap" }}
+                            direction={{ base: "column", md: "row" }}
+                              gap={4}
+                               align="center"
+                                 justify="center"
+                                    mb={4}
+                                   >  
+                          <FormControl isRequired flex="1">
+                 <FormLabel fontSize={{ base: "sm", md: "md" }}>Ge'ez Root Word</FormLabel>
+             <Input
+                    size={{ base: "sm", md: "md" }}
+                       bg="white"
+                         color="black"
+                           border="1px solid"
+                              borderColor="orange.300"
+           _hover={{ borderColor: "orange.400" }}
+           _focus={{ borderColor: "orange.500", boxShadow: "0 0 0 1px orange" }}
+          borderRadius="2xl"
+           placeholder="Enter Ge'ez root word"
+          value={inputWord}
+          onChange={(e) => setInputWord(e.target.value)}
+         />
     </FormControl>
-
     <FormControl isRequired flex="1">
       <FormLabel fontSize={{ base: "sm", md: "md" }}>Rule</FormLabel>
       <Select
           size={{ base: "sm", md: "md" }}
-
+        bg="white"
+        color="black"
+        border="1px solid"
+        borderColor="orange.300"
+        borderRadius="2xl"
+        
+         _hover={{ borderColor: "orange.400" }}
+        _focus={{ borderColor: "orange.500", boxShadow: "0 0 0 1px orange" }}
         placeholder="Select Rule"
         value={ruleId}
         onChange={(e) => setRuleId(e.target.value)}
@@ -204,30 +236,62 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
     </FormControl>
   </Flex>
 </Box>
-                <Flex justifyContent="flex-end" mt="auto" gap={2} irection={{ base: "column", md: "row" }}>
-                  <Button
-                    type="submit"
-                    colorScheme="blue"
-                    position="relative"
-                    size={{ base: "sm", md: "md" }}
-                    width={{ base: "100%", md: "150px" }}
-                    isLoading={loading}
-                    isDisabled={loading}
-                    loadingText="Generating..."
-                  >
-                    {loading ? "Generating..." : "Generate"}
-                  </Button>
-                            <Button
-                               colorScheme="gray"
-                                onClick={handlerClear}
-                                isDisabled={loading}
-                                 size={{ base: "sm", md: "md" }}
-                                width={{ base: "100%", md: "auto" }}
-                                         >
-                                         Clear All
-                          </Button>
+               <Flex
+  justifyContent="center"
+  alignItems="center"
+  mt={{ base: -2, md: -1 }}
+  mb={{ base: 6, md: 8 }}
+  gap={3}
+  direction={{ base: "column", md: "row" }}
+>
+  <Button
+    type="submit"
+    leftIcon={<Repeat size={18} />}
+    size={{ base: "sm", md: "md" }}
+    minW={{ base: "100%", md: "140px" }}
+    isLoading={loading}
+    isDisabled={loading}
+    loadingText="Generating..."
+    fontWeight="semibold"
+    bgGradient="linear(to-r, orange.400, orange.600)"
+    color="white"
+    _hover={{ bgGradient: "linear(to-r, orange.500, orange.700)", transform: "scale(1.03)" }}
+    _active={{ transform: "scale(0.97)" }}
+    _dark={{
+      bgGradient: "linear(to-r, orange.300, orange.500)",
+      _hover: { bgGradient: "linear(to-r, orange.400, orange.600)" }
+    }}
+    transition="all 0.2s"
+    borderRadius="xl"
+    shadow="md"
+  >
+    {loading ? "Generating..." : "Generate"}
+  </Button>
 
-                </Flex>
+  <Button
+    leftIcon={<Trash2 size={18} />}
+    onClick={handlerClear}
+    isDisabled={loading}
+    size={{ base: "sm", md: "md" }}
+    minW={{ base: "100%", md: "140px" }}
+    fontWeight="semibold"
+    bg="red.500"
+    color="white"
+    _hover={{ bg: "red.600", transform: "scale(1.03)" }}
+    _active={{ transform: "scale(0.97)" }}
+    _dark={{
+      bg: "red.400",
+      _hover: { bg: "red.500" },
+      color: "white"
+    }}
+    transition="all 0.2s"
+    borderRadius="xl"
+    shadow="md"
+  >
+    Clear All
+  </Button>
+</Flex>
+
                 {
                   loading && (
                     <Box display="flex" justifyContent="center" mt={6}>
@@ -240,8 +304,8 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
           </Box>
 
           {/* Result section */}
-          {result.length > 0 && !loading && result.map ((result, index) => (
-            <Box key={index} mt={8}  bg={resultBg}
+          {result && !loading && (
+            <Box mt={8}  bg={resultBg}
              color={resultcolor}
               py={6}
               px={4}
@@ -250,9 +314,7 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
               mx="auto"
               borderRadius="xl"
               boxShadow="lg">
-              <Text fontSize="lg" fontWeight="semibold" mb={2}>
-                {index }
-              </Text>
+             
                <Flex gap={4} mb={4} justifyContent="flex-end" wrap="wrap">
                 <Button onClick={downloadAsTxt} size="sm" colorScheme="red">
                  <FaFileDownload />
@@ -291,7 +353,7 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
               </Tbody>
             </Table>
           </Box>
-          ))}
+          )}
 
           {/* Error message */}
           {error && !loading && (
@@ -303,16 +365,23 @@ const formTextColor = useColorModeValue("#D57500", "#FBBF24"); // Amber-400 in d
 
         {/* Word History Sidebar */}
         <Box 
-        position="fixed"  // instead of "sticky"
-  left="0"         // stick to left edge
- top="235px"        // adjust this value based on your navbar height
-  bottom="60px"  
-  width="350px"    // fixed width
-  overflowY="auto" // for scrolling
-  borderRight="1px solid" // optional border
-  borderColor="gray.200"
-    display={{ base: "none", lg: "block" }}
-        >
+          as="aside"
+      //order={-3}
+      //flex="1"
+      display={{ base: isHistoryVisible ? "block" : "none", lg: "block" }}
+  position={{ base: "fixed", lg: "absolute" }}
+      top="248px"
+      bottom=""
+      left="0"
+      //h="50%"
+      transform={{ base: "translate(-50%, -50%)", lg: "none" }}
+      w={{ base: "90%", lg: "320px" }}
+      h={{ base: "80vh", lg: "auto" }}
+      zIndex="999"
+    
+      borderRight="1px solid"
+      boxShadow="md"
+    >
           <WordHistory ref={historyRef} onSelect={handleHistoryClick} />
         </Box>
       </Flex>
