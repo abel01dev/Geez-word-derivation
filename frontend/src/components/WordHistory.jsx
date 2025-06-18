@@ -19,10 +19,12 @@ const WordHistory = forwardRef(({ onSelect }, ref) => {
   const [loading, setLoading] = useState(false);
 
   const fetchHistory = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return setHistory([]);
     // Don't show loading state for quick refreshes
     const startTime = Date.now();
     try {
-      const response = await axios.get(`${API_URL}/api/words`);
+      const response = await axios.get(`${API_URL}/api/words?userId=${userId}`);
       // Only update history if the data is different
       if (JSON.stringify(history) !== JSON.stringify(response.data)) {
         setHistory(response.data);
@@ -56,9 +58,11 @@ const WordHistory = forwardRef(({ onSelect }, ref) => {
   };
 
   const handlerClear = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
     try {
       setLoading(true);
-      const response = await axios.delete(`${API_URL}/api/words`);
+      const response = await axios.delete(`${API_URL}/api/words?userId=${userId}`);
       if (response.status === 200) {
         setHistory([]);
         // Force a refresh of the history from the server

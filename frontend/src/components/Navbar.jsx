@@ -35,6 +35,20 @@ function ClientOnly({ children, fallback = null }) {
 const Navbar = () => {
   const { toggleColorMode, colorMode } = useColorMode();
 const isMobile = useBreakpointValue({ base: true, md: false }); // ✅ Fix added here
+const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("isAuthenticated"));
+
+useEffect(() => {
+  const syncAuth = () => {
+    setIsLoggedIn(!!localStorage.getItem("isAuthenticated"));
+  };
+  window.addEventListener("storage", syncAuth);
+  // Listen for changes in the same tab
+  const interval = setInterval(syncAuth, 500);
+  return () => {
+    window.removeEventListener("storage", syncAuth);
+    clearInterval(interval);
+  };
+}, []);
 
   return (
    <Box
@@ -97,7 +111,34 @@ backdropFilter="blur(35px)"
                 <FaCircleInfo />
               </Button>
             </Link>
- 
+            {isLoggedIn ? (
+              <Button
+                aria-label="Logout"
+                borderRadius="3xl"
+                size={{ base: "xs", md: "sm" }}
+                colorScheme="orange"
+                variant="solid"
+                onClick={() => {
+                  localStorage.removeItem("isAuthenticated");
+                  setIsLoggedIn(false);
+                  window.location.href = "/auth";
+                }}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Link to={"/auth"}>
+                <Button
+                  aria-label="Login"
+                  borderRadius="3xl"
+                  size={{ base: "xs", md: "sm" }}
+                  colorScheme="orange"
+                  variant="solid"
+                >
+                  Login
+                </Button>
+              </Link>
+            )}
             <ClientOnly fallback={<Skeleton boxSize="8" />}>
               <IconButton
                 onClick={toggleColorMode}

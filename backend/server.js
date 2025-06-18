@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const { deriveWord, loadAllRules } = require('./derivation_engine');
 const WordHistory = require('./models/WordHistory');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = 5000;
@@ -30,7 +31,11 @@ mongoose.connect("mongodb://127.0.0.1:27017/geez-word-derivation", {
 // Word History Routes
 app.get('/api/words', async (req, res) => {
   try {
-    const history = await WordHistory.find().sort({ timestamp: -1 }).limit(10);
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'User ID required' });
+    }
+    const history = await WordHistory.find({ user: userId }).sort({ timestamp: -1 }).limit(10);
     res.json(history);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -40,7 +45,11 @@ app.get('/api/words', async (req, res) => {
 // Add DELETE endpoint for clearing history
 app.delete('/api/words', async (req, res) => {
   try {
-    await WordHistory.deleteMany({});
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'User ID required' });
+    }
+    await WordHistory.deleteMany({ user: userId });
     res.status(200).json({ message: 'History cleared successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,10 +58,15 @@ app.delete('/api/words', async (req, res) => {
 
 app.post('/api/words', async (req, res) => {
   try {
+    const userId = req.body.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'User ID required' });
+    }
     const wordHistory = new WordHistory({
       originalWord: req.body.originalWord,
       derivedWord: req.body.derivedWord,
-      pattern: req.body.pattern
+      pattern: req.body.pattern,
+      user: userId
     });
     const savedHistory = await wordHistory.save();
     res.status(201).json(savedHistory);
@@ -117,6 +131,8 @@ app.get("/api/rules", (req, res) => {
   }));
   res.json(list);
 });
+
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
