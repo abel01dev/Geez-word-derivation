@@ -19,23 +19,16 @@ const WordHistory = forwardRef(({ onSelect }, ref) => {
   const [loading, setLoading] = useState(false);
 
   const fetchHistory = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return setHistory([]);
-    // Don't show loading state for quick refreshes
-    const startTime = Date.now();
+    setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/words?userId=${userId}`);
-      // Only update history if the data is different
+      const response = await axios.get(`${API_URL}/api/words`);
       if (JSON.stringify(history) !== JSON.stringify(response.data)) {
         setHistory(response.data);
       }
     } catch (err) {
       console.error("Error fetching history:", err);
     } finally {
-      // Only show loading state if the request took more than 300ms
-      if (Date.now() - startTime > 300) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
@@ -58,11 +51,9 @@ const WordHistory = forwardRef(({ onSelect }, ref) => {
   };
 
   const handlerClear = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.delete(`${API_URL}/api/words?userId=${userId}`);
+      const response = await axios.delete(`${API_URL}/api/words`);
       if (response.status === 200) {
         setHistory([]);
         // Force a refresh of the history from the server
@@ -70,16 +61,13 @@ const WordHistory = forwardRef(({ onSelect }, ref) => {
       }
     } catch (err) {
       console.error("Error clearing history:", err);
-      // Refresh history anyway in case of partial success
-      await fetchHistory();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    
-    <Box align="center" p={4}  borderRadius="md" boxShadow="sm" position="relative" bg={useColorModeValue("gray.50", "#383838")}>
+    <Box align="center" p={4} borderRadius="md" boxShadow="sm" position="relative" bg={useColorModeValue("gray.50", "#383838")}>
       <Heading size="md" mb={4} display="flex" justifyContent="space-between" alignItems="center">
         History
         <Button 

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import AboutUsPage from "./pages/AboutUsPage";
 import HomePage from "./pages/HomePage";
 import Support from "./pages/Support";
@@ -7,6 +8,10 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 function App() {
+  useEffect(() => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userId");
+  }, []);
   const isAuthenticated = !!localStorage.getItem("isAuthenticated");
   return (
     <>

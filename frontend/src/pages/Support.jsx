@@ -115,6 +115,18 @@ to email us              </Link>
             </Text>
           </Box>
         </Collapse>
+
+        {/* Sign Up and Login Instructions */}
+        <Box p={4} bg="white" borderRadius="lg" border="1px solid #E2E8F0" w="100%">
+          <Text fontSize="xl" fontWeight="bold" mb={2}>How to Sign Up and Log In</Text>
+          <Text as="ol" pl={4} style={{ listStyleType: 'decimal' }}>
+            <li>On the login page, click <b>Sign Up</b> and enter your full name, email, and password.</li>
+            <li>Click the <b>Sign Up</b> button. After successful registration, you will be redirected to the login page.</li>
+            <li>Enter your registered email and password on the login page and click the <b>Login</b> button.</li>
+            <li> After successful login, you will access the Geez Word Derivation feature.</li>
+         <li>if you finish these step Read <b>How the geez derivation tool work</b></li>
+          </Text>
+        </Box>
       </VStack>
     </Box>
   );

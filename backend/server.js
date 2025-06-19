@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { deriveWord, loadAllRules } = require('./derivation_engine');
-const WordHistory = require('./models/WordHistory');
 const authRoutes = require('./routes/auth');
+const wordHistoryRoutes = require('./routes/wordHistory');
+const WordHistory = require('./models/WordHistory');
 
 const app = express();
 const PORT = 5000;
@@ -28,53 +29,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/geez-word-derivation", {
   process.exit(1);
 });
 
-// Word History Routes
-app.get('/api/words', async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    if (!userId) {
-      return res.status(401).json({ message: 'User ID required' });
-    }
-    const history = await WordHistory.find({ user: userId }).sort({ timestamp: -1 }).limit(10);
-    res.json(history);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Add DELETE endpoint for clearing history
-app.delete('/api/words', async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    if (!userId) {
-      return res.status(401).json({ message: 'User ID required' });
-    }
-    await WordHistory.deleteMany({ user: userId });
-    res.status(200).json({ message: 'History cleared successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.post('/api/words', async (req, res) => {
-  try {
-    const userId = req.body.userId;
-    if (!userId) {
-      return res.status(401).json({ message: 'User ID required' });
-    }
-    const wordHistory = new WordHistory({
-      originalWord: req.body.originalWord,
-      derivedWord: req.body.derivedWord,
-      pattern: req.body.pattern,
-      user: userId
-    });
-    const savedHistory = await wordHistory.save();
-    res.status(201).json(savedHistory);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
 // Derivation endpoint
 app.post('/derive', async (req, res) => {
   const { word: root, ruleId } = req.body;
@@ -89,30 +43,7 @@ app.post('/derive', async (req, res) => {
     const result = deriveWord(root, ruleIdNum);
 
     if (result) {
-      try {
-        // Save to history
-        await WordHistory.findOneAndUpdate(
-          {
-            originalWord: root,
-            pattern: `Rule ${ruleIdNum}`
-          },
-          {
-            $set: {
-              derivedWord: result.pastTense || Object.values(result)[0],
-              timestamp: new Date()
-            }
-          },
-          {
-            upsert: true,
-            new: true
-          }
-        );
-        
-        res.json(result);
-      } catch (historyError) {
-        // If history fails, still return the derivation
-        res.json(result);
-      }
+      res.json(result);
     } else {
       res.status(404).json({ 
         error: `Could not derive words for "${root}" using Rule ${ruleIdNum}. Please check if you're using the correct rule for this word type.`
@@ -132,7 +63,9 @@ app.get("/api/rules", (req, res) => {
   res.json(list);
 });
 
+// Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/words', wordHistoryRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

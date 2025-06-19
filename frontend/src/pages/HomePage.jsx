@@ -47,10 +47,16 @@ export default function DerivationApp() {
         ruleId,
       });
 
-      setTimeout(() => {
+      setTimeout(async () => {
         if (response.data) {
           setResult(response.data);
           setError(null);
+          // Save to word history (global, not user-dependent)
+          await axios.post(`${API_URL}/api/words`, {
+            originalWord: inputWord,
+            derivedWord: response.data.pastTense || Object.values(response.data)[0],
+            pattern: `Rule ${ruleId}`
+          });
           // Refresh history after successful derivation
           historyRef.current?.fetchHistory();
         } else {

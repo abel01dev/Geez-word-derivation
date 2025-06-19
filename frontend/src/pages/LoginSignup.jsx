@@ -79,7 +79,9 @@ const LoginSignup = () => {
   return (
     <div className="auth-bg">
       <div className="auth-container">
-        <h2 className="auth-title">{isLogin ? "Login" : "Sign Up"}</h2>
+        <h2 className="auth-title" style={{fontSize: '1.5rem', textAlign: 'center', fontWeight: 500}}>
+          {isLogin ? "Unlock your Geez word history" : "Sign Up"}
+        </h2>
         <form
           className="auth-form"
           onSubmit={isLogin ? handleLogin : handleSignup}
